@@ -14,6 +14,11 @@ A Python-based stock and cryptocurrency monitoring and alerting system with web 
 - **Docker Support**: Includes Dockerfile and docker-compose for easy deployment.
 - **BTC ahr999 Model**: Includes a BTC-specific model and chart for long-term DCA strategy.
 
+## Demo
+
+![Demo 1](static/demo1.JPG)
+![Demo 2](static/demo2.jpg)
+
 ## Project Structure
 
 ```
