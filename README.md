@@ -1,6 +1,7 @@
 # Stock Monitor
 
 A Python-based stock and cryptocurrency monitoring and alerting system with web dashboard, Telegram, and email notifications.
+This only provides technical indicator calculation methods and is not intended as an investment reference.
 
 ## Features
 
