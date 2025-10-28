@@ -1,0 +1,19 @@
+services:
+  stock_monitor:
+    build: .
+    image: stock_monitor:latest
+    container_name: stock_monitor_container
+    #    ports:
+    #      - "5000:5000"
+    restart: unless-stopped
+    environment:
+      - TELEGRAM_BOT_TOKEN=your_tg_bot_token
+      - TELEGRAM_CHAT_ID=your_tg_bot_id
+      - EMAIL_SENDER=your_email@gmail.com
+      - EMAIL_PASSWORD=your_app_password
+      - EMAIL_RECEIVER=receiver_email@gmail.com
+    volumes:
+      - ./logs:/app/logs
+      - ./entry_state:/app/entry_state # 持久化入场价状态
+      - ./signal_history:/app/signal_history # 持久化信号历史
+      - ./static:/app/static # 持久化图表文件

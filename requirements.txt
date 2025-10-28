@@ -1,0 +1,11 @@
+yfinance
+pandas
+requests
+mplfinance
+flask
+matplotlib
+ta
+django-scheduler
+schedule
+scikit-learn
+dotenv
