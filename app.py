@@ -16,7 +16,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-TICKERS = ["NFLX", "COIN", "TQQQ", "GOOGL", "TSLA", "NVDA", "MSFT", "AMZN","BTC-USD", "ETH-USD"]
+def get_tickers_from_env():
+    """Get TICKERS from environment variable with fallback"""
+    default_tickers = ["NFLX", "COIN", "TQQQ", "GOOGL", "TSLA", "NVDA", "MSFT", "AMZN", "BTC-USD", "ETH-USD"]
+
+    tickers_env = os.getenv('TICKERS')
+    if tickers_env:
+        # Split by comma and clean whitespace
+        tickers = [ticker.strip() for ticker in tickers_env.split(',') if ticker.strip()]
+        return tickers if tickers else default_tickers
+
+    return default_tickers
+
+TICKERS = get_tickers_from_env()
+
 S3_BUCKET = os.getenv("S3_BUCKET", "stock-monitor-bucket")
 STATE_FILE = "entry_state.json"
 
