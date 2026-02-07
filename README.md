@@ -1,118 +1,93 @@
 # Stock Monitor
 
-A Python-based stock and cryptocurrency monitoring and alerting system with web dashboard, Telegram, and email notifications.
-This only provides technical indicator calculation methods and is not intended as an investment reference.
+A Python-based monitoring and alerting system for stocks and cryptocurrencies that integrates technical analysis with automated notifications via Telegram and Email. The system is designed to run as a cloud-native application, specifically optimized for AWS Lambda with S3-backed state persistence.
 
 ## Features
 
-- **Real-time Monitoring**: Monitors user-specified stocks and crypto tickers (via Yahoo Finance).
-- **Technical Analysis**: Calculates RSI, MACD, Bollinger Bands, and generates buy/sell/hold signals.
-- **Automated Alerts**: Sends notifications via Telegram and email for buy/sell signals, take profit, and stop loss events.
-- **Chart Generation**: Automatically generates and saves indicator charts for each ticker.
-- **Web Dashboard**: Flask-based dashboard displays latest price, indicators, signals, and recent history.
-- **Persistence**: Keeps entry prices and signal history for each ticker.
-- **Configurable**: Tickers are chosen by user input at runtime.
-- **Docker Support**: Includes Dockerfile and docker-compose for easy deployment.
-- **BTC ahr999 Model**: Includes a BTC-specific model and chart for long-term DCA strategy.
+* **Multi-Ticker Tracking**: Monitors a customizable list of tickers including major stocks (e.g., AAPL, TSLA, NVDA) and cryptocurrencies (BTC-USD, ETH-USD) via Yahoo Finance.
+* **Technical Indicator Analysis**: Automatically calculates key trading indicators to generate signals:
+* **Relative Strength Index (RSI)**
+* **Bollinger Bands (BB)**
+* **Moving Average Convergence Divergence (MACD)**
 
-## Demo
 
-![Demo 1](static/demo1.png)
-![Demo 2](static/demo2.png)
+* **Scoring-Based Signal Logic**: Uses a weighted scoring system to trigger "BUY," "SELL," "STRONGLY BUY," or "STRONGLY SELL" actions.
+* **Automated Alerts**:
+* **Telegram**: Sends real-time alerts with status updates and generated technical charts.
+* **Email**: Delivers notifications via SMTP (Gmail) including chart attachments.
+
+
+* **Dynamic Risk Management**:
+* **Take Profit**: Automatically triggers at +5%.
+* **Stop Loss**: Automatically triggers at -3%.
+* **Cooldown**: 15-minute window between consecutive signals to prevent alert fatigue.
+
+
+* **Cloud-Native Architecture**: Built for AWS Lambda with state persistence in Amazon S3 for tracking entry prices and signal history.
+* **Visualization**: Generates 15-minute candlestick charts with 5-period and 20-period moving averages using `mplfinance`.
 
 ## Project Structure
 
-```
-.
-├── app.py                # Flask web dashboard
-├── main.py               # Main monitoring script (multi-ticker)
-├── bitcoin.py            # BTC/crypto monitoring and DCA logic
-├── ahr999.py             # BTC ahr999 model and chart
-├── requirements.txt      # Python dependencies
-├── docker-compose.yml    # Docker Compose config
-├── Dockerfile            # Docker build file
-├── static/               # Generated charts and static files
-├── templates/            # Flask HTML templates
-├── entry_state/          # Per-ticker entry price state
-├── signal_history/       # Per-ticker signal history CSVs
-├── logs/                 # Log files
-└── ...
-```
+* `app.py`: The core application logic, containing the AWS Lambda handler, technical analysis functions, and notification dispatchers.
+* `Dockerfile`: Configuration for building the Amazon ECR-compatible container image using the Python 3.10 Lambda base.
+* `requirements.txt`: Lists essential dependencies including `yfinance`, `pandas`, `ta` (Technical Analysis Library), and `boto3`.
+* `entry_state.json`: (Stored in S3) Maintains the current investment state, including entry prices and timestamps for cooldowns.
 
-## Usage
+## Technical Stack
 
-### 1. Install Dependencies
+* **Language**: Python 3.10+
+* **Data Source**: Yahoo Finance (`yfinance`)
+* **Analysis**: `pandas`, `ta`
+* **Cloud**: AWS Lambda, Amazon S3, Amazon ECR
+* **Visualization**: `matplotlib`, `mplfinance`
+
+## Setup and Deployment
+
+### 1. Environment Variables
+
+The following environment variables must be configured for the application to function:
+
+* `S3_BUCKET`: The name of your AWS S3 bucket for state storage.
+* `TICKERS`: Comma-separated list of symbols (e.g., `NVDA,BTC-USD`).
+* `TELEGRAM_BOT_TOKEN` & `TELEGRAM_CHAT_ID`: For Telegram notifications.
+* `EMAIL_SENDER`, `EMAIL_PASSWORD`, & `EMAIL_RECEIVER`: For SMTP email alerts.
+
+### 2. Local Installation
 
 ```bash
 pip install -r requirements.txt
+
 ```
 
-### 2. Set Environment Variables
+### 3. Docker Build for AWS ECR
 
-Set the following environment variables (or edit in `docker-compose.yml`):
-
-- `TELEGRAM_BOT_TOKEN`
-- `TELEGRAM_CHAT_ID`
-- `EMAIL_SENDER`
-- `EMAIL_PASSWORD`
-- `EMAIL_RECEIVER`
-
-### 3. Run the Monitor
-
+#### Build Image
 ```bash
-python main.py
-```
-
-You will be prompted to enter tickers (e.g. `AAPL,TSLA,BTC-USD`).
-
-### 4. Web Dashboard
-
-Start the Flask app:
-
-```bash
-python app.py
-```
-
-Visit [http://localhost:5000](http://localhost:5000) to view the dashboard.
-
-### 5. Docker
-
-To run with Docker Compose:
-
-```bash
-docker-compose up --build
-```
-
-## Customization
-
-- **Tickers**: Enter any valid Yahoo Finance ticker symbols at runtime.
-- **Intervals**: Edit `CHECK_INTERVAL` and other constants in `main.py` or `bitcoin.py`.
-- **Indicators**: Modify or extend technical analysis logic as needed.
-
-## Signal Logic
-
-- **Buy/Sell**: Based on a scoring system using RSI, MACD, and Bollinger Bands.
-- **Take Profit/Stop Loss**: Alerts and clears entry state when thresholds are hit.
-- **BTC DCA**: Special logic for Bitcoin dollar-cost-averaging and ahr999 valuation.
-
-# AWS
-
-# Build Image
 docker build --platform linux/amd64 --provenance=false -t stock-monitor .
 
-# Create repository
+```
+#### Authenticate Docker
+```bash
 aws ecr create-repository --repository-name stock-monitor --region us-east-1
 
-# Authenticate Docker
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 123456789012.dkr.ecr.us-east-1.amazonaws.com
+```
 
-# Tag the image
+#### Tag Image
+```bash
 docker tag stock-monitor:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/stock-monitor:latest
 
-# Push the image
+```
+
+### Push the image
+```bash
 docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/stock-monitor:latest
 
-## License
+```
 
-MIT License
 
+## Signal Criteria
+
+The system uses a score-based threshold to determine actions:
+
+* **BUY Signal**: Triggered when the score is ≥ 4, influenced by the price being below the lower Bollinger Band, RSI < 30, or a positive MACD crossover.
+* **SELL Signal**: Triggered when the score is ≥ 4, influenced by the price being above the upper Bollinger Band, RSI > 70, or a negative MACD crossover.
