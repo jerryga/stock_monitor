@@ -1,54 +1,50 @@
 # Stock Monitor
 
-A Python-based monitoring and alerting system for stocks and cryptocurrencies that integrates technical analysis with automated notifications via Telegram and Email. The system is designed to run as a cloud-native application, specifically optimized for AWS Lambda with S3-backed state persistence.
+A Python-based monitoring and alerting system for stocks and cryptocurrencies that integrates technical analysis with automated notifications via Telegram and Email. This system is designed to run as a cloud-native application, specifically optimized for AWS Lambda with S3-backed state persistence.
+
+**Disclaimer: This project is for technical informational purposes only. It only provides technical indicator calculation methods and is not intended as an investment reference or recommendation.**
 
 ## Features
 
 * **Multi-Ticker Tracking**: Monitors a customizable list of tickers including major stocks (e.g., AAPL, TSLA, NVDA) and cryptocurrencies (BTC-USD, ETH-USD) via Yahoo Finance.
-* **Technical Indicator Analysis**: Automatically calculates key trading indicators to generate signals:
+* **Technical Analysis**: Automatically calculates key trading indicators to generate signals:
 * **Relative Strength Index (RSI)**
 * **Bollinger Bands (BB)**
 * **Moving Average Convergence Divergence (MACD)**
 
 
-* **Scoring-Based Signal Logic**: Uses a weighted scoring system to trigger "BUY," "SELL," "STRONGLY BUY," or "STRONGLY SELL" actions.
+* **Scoring-Based Signal Logic**: Uses a weighted scoring system based on RSI, MACD, and Bollinger Bands to trigger "BUY," "SELL," "STRONGLY BUY," or "STRONGLY SELL" actions.
 * **Automated Alerts**:
-* **Telegram**: Sends real-time alerts with status updates and generated technical charts.
+* **Telegram**: Sends real-time alerts with status updates and technical charts.
 * **Email**: Delivers notifications via SMTP (Gmail) including chart attachments.
 
 
-* **Dynamic Risk Management**:
+* **Risk Management**:
 * **Take Profit**: Automatically triggers at +5%.
 * **Stop Loss**: Automatically triggers at -3%.
-* **Cooldown**: 15-minute window between consecutive signals to prevent alert fatigue.
+* **Cooldown**: 15-minute window between consecutive signals for the same ticker.
 
 
 * **Cloud-Native Architecture**: Built for AWS Lambda with state persistence in Amazon S3 for tracking entry prices and signal history.
-* **Visualization**: Generates 15-minute candlestick charts with 5-period and 20-period moving averages using `mplfinance`.
+* **Visualization**: Generates 15-minute candlestick charts with 5-period and 20-period moving averages.
+* **BTC ahr999 Model**: Includes a specific model and chart for Bitcoin long-term DCA strategy.
 
 ## Project Structure
 
-* `app.py`: The core application logic, containing the AWS Lambda handler, technical analysis functions, and notification dispatchers.
+* `app.py`: Core application logic containing the AWS Lambda handler, technical analysis functions, and notification dispatchers.
+* `main.py`: Main monitoring script for multi-ticker tracking.
+* `ahr999.py`: BTC ahr999 model and chart generation logic.
 * `Dockerfile`: Configuration for building the Amazon ECR-compatible container image using the Python 3.10 Lambda base.
-* `requirements.txt`: Lists essential dependencies including `yfinance`, `pandas`, `ta` (Technical Analysis Library), and `boto3`.
-* `entry_state.json`: (Stored in S3) Maintains the current investment state, including entry prices and timestamps for cooldowns.
-
-## Technical Stack
-
-* **Language**: Python 3.10+
-* **Data Source**: Yahoo Finance (`yfinance`)
-* **Analysis**: `pandas`, `ta`
-* **Cloud**: AWS Lambda, Amazon S3, Amazon ECR
-* **Visualization**: `matplotlib`, `mplfinance`
+* `requirements.txt`: Lists essential dependencies including `yfinance`, `pandas`, `ta`, and `boto3`.
 
 ## Setup and Deployment
 
 ### 1. Environment Variables
 
-The following environment variables must be configured for the application to function:
+Configure the following environment variables:
 
-* `S3_BUCKET`: The name of your AWS S3 bucket for state storage.
-* `TICKERS`: Comma-separated list of symbols (e.g., `NVDA,BTC-USD`).
+* `S3_BUCKET`: Your AWS S3 bucket for state storage.
+* `TICKERS`: Comma-separated list of symbols (e.g., `AAPL,TSLA,BTC-USD`).
 * `TELEGRAM_BOT_TOKEN` & `TELEGRAM_CHAT_ID`: For Telegram notifications.
 * `EMAIL_SENDER`, `EMAIL_PASSWORD`, & `EMAIL_RECEIVER`: For SMTP email alerts.
 
@@ -83,11 +79,11 @@ docker tag stock-monitor:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/sto
 docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/stock-monitor:latest
 
 ```
+### Demo
 
+![Demo1](./static/demo1.png)
+![Demo2](./static/demo2.png)
 
-## Signal Criteria
+## License
 
-The system uses a score-based threshold to determine actions:
-
-* **BUY Signal**: Triggered when the score is ≥ 4, influenced by the price being below the lower Bollinger Band, RSI < 30, or a positive MACD crossover.
-* **SELL Signal**: Triggered when the score is ≥ 4, influenced by the price being above the upper Bollinger Band, RSI > 70, or a negative MACD crossover.
+MIT License
