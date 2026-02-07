@@ -17,8 +17,8 @@ This only provides technical indicator calculation methods and is not intended a
 
 ## Demo
 
-![Demo 1](static/demo1.JPG)
-![Demo 2](static/demo2.jpg)
+![Demo 1](static/demo1.png)
+![Demo 2](static/demo2.png)
 
 ## Project Structure
 
