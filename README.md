@@ -60,8 +60,14 @@ pip install -r requirements.txt
 #### Build Image
 ```bash
 docker build --platform linux/amd64 --provenance=false -t stock-monitor .
-
 ```
+#### Get Login Credential
+
+```bash
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin [Account Id].dkr.ecr.us-east-1.amazonaws.com
+```
+
+
 #### Authenticate Docker
 ```bash
 aws ecr create-repository --repository-name stock-monitor --region us-east-1
@@ -70,13 +76,13 @@ aws ecr create-repository --repository-name stock-monitor --region us-east-1
 
 #### Tag Image
 ```bash
-docker tag stock-monitor:latest 123456789012.dkr.ecr.us-east-1.amazonaws.com/stock-monitor:latest
+docker tag stock-monitor:latest [Account ID].dkr.ecr.us-east-1.amazonaws.com/stock-monitor:latest
 
 ```
 
 ### Push the image
 ```bash
-docker push 123456789012.dkr.ecr.us-east-1.amazonaws.com/stock-monitor:latest
+docker push [Account Id].dkr.ecr.us-east-1.amazonaws.com/stock-monitor:latest
 
 ```
 ### Demo
