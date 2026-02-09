@@ -198,7 +198,6 @@ def check_signal_for_ticker(ticker):
 
 def lambda_handler(event, context):
     logging.info("=== Lambda Stock Monitor Run ===")
-    send_telegram("=== Lambda Stock Monitor Run ===")
 
     state = load_state()
     now = datetime.now(timezone.utc).timestamp()
