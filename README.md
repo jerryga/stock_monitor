@@ -61,6 +61,8 @@ pip install -r requirements.txt
 ```bash
 docker build --platform linux/amd64 --provenance=false -t stock-monitor .
 ```
+
+
 #### Get Login Credential
 
 ```bash

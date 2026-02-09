@@ -16,12 +16,14 @@ RUN yum install -y \
     libpng-devel \
     && yum clean all
 
-# Upgrade pip
-RUN pip install --upgrade pip
+# Set working directory
+WORKDIR ${LAMBDA_TASK_ROOT}
 
 # Copy requirements and install dependencies
-COPY requirements.txt ${LAMBDA_TASK_ROOT}/
-WORKDIR ${LAMBDA_TASK_ROOT}
+COPY requirements.txt .
+
+# Upgrade pip
+RUN pip install --upgrade pip
 
 # Install heavy numerical libs first to avoid build errors
 RUN pip install numpy pandas matplotlib
@@ -29,8 +31,8 @@ RUN pip install numpy pandas matplotlib
 # Install remaining dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py ${LAMBDA_TASK_ROOT}/
-
+# Copy your application code
+COPY app.py .
 
 # Set Lambda entrypoint
 CMD ["app.lambda_handler"]
